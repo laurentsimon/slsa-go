@@ -1,4 +1,4 @@
-module github.com/asraa/slsa-on-github/builder
+module github.com/gossts/slsa-go/builder
 
 go 1.17
 
@@ -8,10 +8,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
-require (
-	github.com/asraa/slsa-on-github/build-go v0.0.0-20220301160721-a71e4e88158f
-	github.com/sigstore/sigstore v1.1.1-0.20220130134424-bae9b66b8442
-)
+require github.com/sigstore/sigstore v1.1.1-0.20220130134424-bae9b66b8442
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
