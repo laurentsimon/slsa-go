@@ -77,7 +77,7 @@ func (b *GoBuild) Run(dry bool) error {
 		flags = append(flags, fmt.Sprintf("-ldflags=%s", ldflags))
 	}
 
-	// Set filename as last argument.
+	// Generate filename.
 	filename, err := b.generateOutputFilename()
 	if err != nil {
 		return err
@@ -100,6 +100,7 @@ func (b *GoBuild) Run(dry bool) error {
 		return fmt.Errorf("OUTPUT_BINARY not defined")
 	}
 
+	// Set the filename last.
 	flags = append(flags, []string{"-o", binary}...)
 
 	fmt.Println("binary", binary)

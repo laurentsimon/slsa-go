@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-func TestAllowedEnvVariable(t *testing.T) {
+func Test_isAllowedEnvVariable(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -51,7 +51,7 @@ func TestAllowedEnvVariable(t *testing.T) {
 	}
 }
 
-func TestAllowedArgument(t *testing.T) {
+func Test_isAllowedArg(t *testing.T) {
 	t.Parallel()
 
 	var tests []struct {
@@ -114,7 +114,7 @@ func TestAllowedArgument(t *testing.T) {
 	}
 }
 
-func TestFilenameAllowed(t *testing.T) {
+func Test_generateOutputFilename(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -282,7 +282,7 @@ func TestFilenameAllowed(t *testing.T) {
 	}
 }
 
-func TestArgEnvVariables(t *testing.T) {
+func Test_generateEnvVariables(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -410,7 +410,7 @@ func TestArgEnvVariables(t *testing.T) {
 	}
 }
 
-func TestEnvVariables(t *testing.T) {
+func Test_generateEnvVariables(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -522,7 +522,7 @@ func TestEnvVariables(t *testing.T) {
 	}
 }
 
-func TestGenerateLdflags(t *testing.T) {
+func Test_generateLdflags(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -688,7 +688,7 @@ func TestGenerateLdflags(t *testing.T) {
 	}
 }
 
-func TestGenerateFlags(t *testing.T) {
+func Test_generateFlags(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
