@@ -282,7 +282,7 @@ func Test_generateOutputFilename(t *testing.T) {
 	}
 }
 
-func Test_generateEnvVariables(t *testing.T) {
+func Test_SetArgEnvVariables(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {

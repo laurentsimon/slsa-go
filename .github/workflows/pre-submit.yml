@@ -3,10 +3,6 @@ on: [pull_request, workflow_dispatch]
 
 permissions: read-all
 
-env:
-  BUILDER_DIR: builder
-  PROVENANCE_VERIFIER_DIR: provenance-verifier
-
 jobs:
   pre-submit:
     runs-on: ubuntu-latest
@@ -23,22 +19,9 @@ jobs:
         run: |
           set -euo pipefail
           
-          cd "$BUILDER_DIR"
+          # Download dependencies.
           go mod vendor
-          # Build
+          # Build.
           go build -mod=vendor
-          # Tests
+          # Test.
           go test -mod=vendor -v ./...
-          cd -
-      
-      # - name: Run tests for provenance verifier
-      #   run: |
-      #     set -euo pipefail
-          
-      #     cd "$PROVENANCE_VERIFIER_DIR"
-      #     go mod vendor
-      #     # Build
-      #     go build -mod=vendor
-      #     # Tests
-      #     go test -mod=vendor -v ./...
-      #     cd -

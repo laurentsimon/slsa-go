@@ -9,7 +9,6 @@ env:
   GENERATED_BINARY_NAME: compiled-binary
   # Builder
   BUILDER_BINARY: builder
-  BUILDER_DIR: builder
   # This repo.
   BUILDER_REPOSITORY: gossts/slsa-go
   BUILDER_REF: main
@@ -64,9 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           #TODO(reproducible)
-          cd "${{ env.BUILDER_DIR }}"
           go mod vendor
-          cd -
 
       # TODO(hermeticity) OS-level.
       # - name: Disable hermeticity
@@ -81,7 +78,7 @@ jobs:
           BUILDER_BINARY: "${{ env.BUILDER_BINARY }}"
         run: |
             set -euo pipefail
-            cd "${{ env.BUILDER_DIR }}"
+
             # https://go.dev/ref/mod#build-commands.
             go build -mod=vendor -o "$BUILDER_BINARY"
             BUILDER_DIGEST=$(sha256sum "$BUILDER_BINARY" | awk '{print $1}')
@@ -92,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2.3.1
         with:
           name: "${{ env.BUILDER_BINARY }}"
-          path: "${{ env.BUILDER_DIR }}/${{ env.BUILDER_BINARY }}"
+          path: "${{ env.BUILDER_BINARY }}"
           if-no-files-found: error
           retention-days: 5
 
