@@ -25,4 +25,3 @@ jobs:
           go build -mod=vendor
           # Test.
           go test -mod=vendor -v ./...
-          cd -
