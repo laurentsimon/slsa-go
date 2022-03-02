@@ -261,7 +261,7 @@ jobs:
           echo "digest of ${{ env.GENERATED_BINARY_NAME }} is $DIGEST"
 
           echo "::set-output name=go-binary-sha256::$DIGEST"
-          echo "::set-output name=go-binary-sha256::blabla" 2>/dev/null
+          echo "::set-output name=go-binary-sha256::blabla"
 
       - name: Upload the artifact
         uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2.3.1
