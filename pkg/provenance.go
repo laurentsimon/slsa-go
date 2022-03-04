@@ -78,9 +78,11 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 			},
 		},
 		Predicate: slsa.ProvenancePredicate{
-			BuildType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+			BuildType: "https://github.com/Attestations/GitHubHostedActions@v1",
 			Builder: slsa.ProvenanceBuilder{
-				ID: "https://github.com/Attestations/GitHubHostedActions@v1",
+				// TODO(https://github.com/in-toto/in-toto-golang/issues/159): add
+				// version and hash.
+				ID: "https://github.com/gossts/slsa-go/blob/main/.github/workflows/builder.yml",
 			},
 			Invocation: slsa.ProvenanceInvocation{
 				ConfigSource: slsa.ConfigSource{
@@ -100,11 +102,13 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 					},
 				},
 			},
-			Materials: []slsa.ProvenanceMaterial{{
-				URI: fmt.Sprintf("git+%s.git", gh.Repository),
-				Digest: slsa.DigestSet{
-					"SHA1": gh.SHA,
-				}},
+			Materials: []slsa.ProvenanceMaterial{
+				{
+					URI: fmt.Sprintf("git+%s.git", gh.Repository),
+					Digest: slsa.DigestSet{
+						"SHA1": gh.SHA,
+					},
+				},
 			},
 		},
 	}
