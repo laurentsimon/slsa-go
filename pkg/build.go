@@ -104,7 +104,7 @@ func (b *GoBuild) Run(dry bool) error {
 		if err != nil {
 			return err
 		}
-		// Share the list of flags used.
+		// Share the command used.
 		fmt.Printf("::set-output name=go-command: %s\n", command)
 		return nil
 	}
