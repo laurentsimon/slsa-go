@@ -15,6 +15,8 @@
 package pkg
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -97,16 +99,6 @@ func (b *GoBuild) Run(dry bool) error {
 		return err
 	}
 
-	// A dry run prints the information that is trusted, before
-	// the compiler is invoked.
-	if dry {
-		// Share the resolved name of the binary.
-		fmt.Println("dry build")
-		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
-		fmt.Printf("TODO:set-output name=go-arguments: %s\n", flags)
-		return nil
-	}
-
 	// Use the name provider via env variable for the compilation.
 	// This variable is trusted and defined by the re-usable workflow.
 	binary := os.Getenv("OUTPUT_BINARY")
@@ -115,11 +107,38 @@ func (b *GoBuild) Run(dry bool) error {
 	}
 
 	// Set the filename last.
-	flags = append(flags, []string{"-o", binary}...)
+	command := append(flags, []string{"-o", binary}...)
+
+	// A dry run prints the information that is trusted, before
+	// the compiler is invoked.
+	if dry {
+		// Share the resolved name of the binary.
+		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
+		command, err := marshallCommand(flags)
+		if err != nil {
+			return err
+		}
+		// Share the command used.
+		fmt.Printf("::set-output name=go-command: %s\n", command)
+		return nil
+	}
 
 	fmt.Println("binary", binary)
-	fmt.Println("flags", flags)
-	return syscall.Exec(b.goc, flags, envs)
+	fmt.Println("command", command)
+	return syscall.Exec(b.goc, command, envs)
+}
+
+func marshallCommand(args []string) (string, error) {
+	jsonData, err := json.Marshal(args)
+	if err != nil {
+		return "", fmt.Errorf("json.Marshal: %w", err)
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(jsonData)
+	if err != nil {
+		return "", fmt.Errorf("base64.StdEncoding.DecodeString: %w", err)
+	}
+	return encoded, nil
 }
 
 func (b *GoBuild) generateEnvVariables() ([]string, error) {

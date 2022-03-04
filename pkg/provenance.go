@@ -17,6 +17,7 @@ package pkg
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -51,10 +52,20 @@ type GitHubContext struct {
 	RunNumber  string `json:"run_number"`
 }
 
+type (
+	Step struct {
+		Command []string `json:"command"`
+		Env     []string `json:"env"`
+	}
+	BuildConfig struct {
+		Steps []Step
+	}
+)
+
 // GenerateProvenance translates github context into a SLSA provenance
 // attestation.
 // Spec: https://slsa.dev/provenance/v0.1
-func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
+func GenerateProvenance(name, digest, githubContext, command string) ([]byte, error) {
 	gh := &GitHubContext{}
 	if err := json.Unmarshal([]byte(githubContext), gh); err != nil {
 		return nil, err
@@ -64,6 +75,12 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 	if _, err := hex.DecodeString(digest); err != nil || len(digest) != 64 {
 		return nil, fmt.Errorf("sha256 digest is not valid: %s", digest)
 	}
+
+	com, err := unmarshallCommand(command)
+	if err != nil {
+		return nil, err
+	}
+
 	att := intoto.ProvenanceStatement{
 		StatementHeader: intoto.StatementHeader{
 			Type:          intoto.StatementInTotoV01,
@@ -97,6 +114,15 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 						"GITHUB_RUN_NUMBER": gh.RunNumber,
 						"GITHUB_RUN_ID":     gh.RunId,
 						"GITHUB_EVENT_NAME": gh.EventName,
+					},
+				},
+			},
+			BuildConfig: BuildConfig{
+				Steps: []Step{
+					// Single step.
+					{
+						Command: com,
+						// TODO: env variables.
 					},
 				},
 			},
@@ -152,6 +178,19 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 	}
 
 	return signedAtt, nil
+}
+
+func unmarshallCommand(command string) ([]string, error) {
+	var res []string
+	cs, err := base64.StdEncoding.DecodeString(command)
+	if err != nil {
+		return res, fmt.Errorf("base64.StdEncoding.DecodeString: %w", err)
+	}
+
+	if err := json.Unmarshal(cs, &res); err != nil {
+		return []string{}, fmt.Errorf("json.Unmarshal: %w", err)
+	}
+	return res, nil
 }
 
 func verifyProvenanceName(name string) error {
