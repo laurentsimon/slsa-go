@@ -9,7 +9,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: args
     uses: gossts/slsa-go/.github/workflows/builder.yml@main
     with:
       go-version: 1.17
