@@ -1,3 +1,17 @@
+// Copyright 2021 The GOSST team.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package pkg
 
 import (
@@ -206,7 +220,7 @@ func (b *GoBuild) generateFlags() ([]string, error) {
 }
 
 func isAllowedArg(arg string) bool {
-	for k, _ := range allowedBuildArgs {
+	for k := range allowedBuildArgs {
 		if strings.HasPrefix(arg, k) {
 			return true
 		}
@@ -218,7 +232,7 @@ func isAllowedArg(arg string) bool {
 // variable injection, e.g. LD_PRELOAD, etc.
 // See an overview in https://www.hale-legacy.com/class/security/s20/handout/slides-env-vars.pdf.
 func isAllowedEnvVariable(name string) bool {
-	for k, _ := range allowedEnvVariablePrefix {
+	for k := range allowedEnvVariablePrefix {
 		if strings.HasPrefix(name, k) {
 			return true
 		}

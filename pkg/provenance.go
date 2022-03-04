@@ -1,4 +1,4 @@
-// Copyright 2021 The slsa-on-github Authors.
+// Copyright 2021 The GOSST team.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -100,11 +100,13 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 					},
 				},
 			},
-			Materials: []slsa.ProvenanceMaterial{{
-				URI: fmt.Sprintf("git+%s.git", gh.Repository),
-				Digest: slsa.DigestSet{
-					"SHA1": gh.SHA,
-				}},
+			Materials: []slsa.ProvenanceMaterial{
+				{
+					URI: fmt.Sprintf("git+%s.git", gh.Repository),
+					Digest: slsa.DigestSet{
+						"SHA1": gh.SHA,
+					},
+				},
 			},
 		},
 	}
