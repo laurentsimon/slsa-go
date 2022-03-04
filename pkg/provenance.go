@@ -78,7 +78,7 @@ func GenerateProvenance(name, digest, githubContext string) ([]byte, error) {
 			},
 		},
 		Predicate: slsa.ProvenancePredicate{
-			BuildType: "https://github.com/Attestations/GitHubHostedActions@v1",
+			BuildType: "https://github.com/Attestations/GitHubHostedReusableWorkflow@v1",
 			Builder: slsa.ProvenanceBuilder{
 				// TODO(https://github.com/in-toto/in-toto-golang/issues/159): add
 				// version and hash.
