@@ -32,6 +32,7 @@ func main() {
 	provenanceCmd := flag.NewFlagSet("provenance", flag.ExitOnError)
 	provenanceName := provenanceCmd.String("binary-name", "", "untrusted binary name of the artifact built")
 	provenanceDigest := provenanceCmd.String("digest", "", "sha256 digest of the untrusted binary")
+	provenanceCommand := provenanceCmd.String("command", "", "command use to compile the binary")
 
 	// Expect a sub-command.
 	if len(os.Args) < 2 {
@@ -62,7 +63,8 @@ func main() {
 		check(err)
 	case provenanceCmd.Name():
 		provenanceCmd.Parse(os.Args[2:])
-		if *provenanceName == "" || *provenanceDigest == "" {
+		if *provenanceName == "" || *provenanceDigest == "" ||
+			*provenanceCommand == "" {
 			usage(os.Args[0])
 		}
 
@@ -71,7 +73,8 @@ func main() {
 			panic(errors.New("environment variable GITHUB_CONTEXT not present"))
 		}
 
-		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest, githubContext)
+		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest,
+			githubContext, *provenanceCommand)
 		check(err)
 
 		filename := fmt.Sprintf("%s.intoto.sig", *provenanceName)
