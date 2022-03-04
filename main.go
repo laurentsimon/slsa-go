@@ -1,3 +1,17 @@
+// Copyright The GOSST team.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -32,6 +46,7 @@ func main() {
 	provenanceCmd := flag.NewFlagSet("provenance", flag.ExitOnError)
 	provenanceName := provenanceCmd.String("binary-name", "", "untrusted binary name of the artifact built")
 	provenanceDigest := provenanceCmd.String("digest", "", "sha256 digest of the untrusted binary")
+	provenanceCommand := provenanceCmd.String("command", "", "command use to compile the binary")
 
 	// Expect a sub-command.
 	if len(os.Args) < 2 {
@@ -62,7 +77,8 @@ func main() {
 		check(err)
 	case provenanceCmd.Name():
 		provenanceCmd.Parse(os.Args[2:])
-		if *provenanceName == "" || *provenanceDigest == "" {
+		if *provenanceName == "" || *provenanceDigest == "" ||
+			*provenanceCommand == "" {
 			usage(os.Args[0])
 		}
 
@@ -71,7 +87,8 @@ func main() {
 			panic(errors.New("environment variable GITHUB_CONTEXT not present"))
 		}
 
-		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest, githubContext)
+		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest,
+			githubContext, *provenanceCommand)
 		check(err)
 
 		filename := fmt.Sprintf("%s.intoto.sig", *provenanceName)
