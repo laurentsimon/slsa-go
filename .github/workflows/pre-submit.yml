@@ -4,7 +4,17 @@ on: [pull_request, workflow_dispatch]
 permissions: read-all
 
 jobs:
-  pre-submit:
+  #TODO(#15): add ldflags and verification.
+  build:
+    permissions:
+      id-token: write
+      contents: read
+    needs: args
+    uses: gossts/slsa-go/.github/workflows/builder.yml@main
+    with:
+      go-version: 1.17
+    
+  unitests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
