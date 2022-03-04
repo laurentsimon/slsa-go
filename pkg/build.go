@@ -85,6 +85,23 @@ func (b *GoBuild) Run(dry bool) error {
 		return err
 	}
 
+	// A dry run prints the information that is trusted, before
+	// the compiler is invoked.
+	if dry {
+		// Set the filename last.
+		com := append(flags, []string{"-o", filename}...)
+
+		// Share the resolved name of the binary.
+		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
+		command, err := marshallCommand(com)
+		if err != nil {
+			return err
+		}
+		// Share the command used.
+		fmt.Printf("::set-output name=go-command: %s\n", command)
+		return nil
+	}
+
 	// Use the name provider via env variable for the compilation.
 	// This variable is trusted and defined by the re-usable workflow.
 	binary := os.Getenv("OUTPUT_BINARY")
@@ -94,20 +111,6 @@ func (b *GoBuild) Run(dry bool) error {
 
 	// Set the filename last.
 	command := append(flags, []string{"-o", binary}...)
-
-	// A dry run prints the information that is trusted, before
-	// the compiler is invoked.
-	if dry {
-		// Share the resolved name of the binary.
-		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
-		command, err := marshallCommand(flags)
-		if err != nil {
-			return err
-		}
-		// Share the command used.
-		fmt.Printf("::set-output name=go-command: %s\n", command)
-		return nil
-	}
 
 	fmt.Println("binary", binary)
 	fmt.Println("command", command)
