@@ -1,4 +1,4 @@
-// Copyright 2021 The slsa-on-github Authors.
+// Copyright The GOSST team.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,9 +95,11 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 			},
 		},
 		Predicate: slsa.ProvenancePredicate{
-			BuildType: "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+			BuildType: "https://github.com/Attestations/GitHubHostedReusableWorkflow@v1",
 			Builder: slsa.ProvenanceBuilder{
-				ID: "https://github.com/Attestations/GitHubHostedActions@v1",
+				// TODO(https://github.com/in-toto/in-toto-golang/issues/159): add
+				// version and hash.
+				ID: "gossts/slsa-go/blob/main/.github/workflows/builder.yml",
 			},
 			Invocation: slsa.ProvenanceInvocation{
 				ConfigSource: slsa.ConfigSource{
