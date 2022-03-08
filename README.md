@@ -31,6 +31,7 @@ version: 1
 env:
   - GO111MODULE=on
   - CGO_ENABLED=0
+
 # Flags for the compiler.
 flags:
   - -trimpath
@@ -39,7 +40,7 @@ flags:
 goos: linux     # same values as GOOS env variable. 
 goarch: amd64   # same values as GOARCH env variable. 
 
-# Binary name
+# Binary name.
 # {{ .OS }} will be replaced by goos field in the config file.
 # {{ .Arch }} will be replaced by goarch field in the config file.
 binary: binary-{{ .OS }}-{{ .Arch }}
@@ -54,7 +55,7 @@ ldflags:
 The builder workflow [gossts/slsa-go/.github/workflows/builder.yml](.github/workflows/builder.yml) accepts the following inputs:
 
 | Name | Required | Description |
-| ----- | -------- | ----------- |
+| ------------ | -------- | ----------- |
 | `go-version` | no | The go version for your project. This value is passed, unchanged, to the [actions/setup-go](https://github.com/actions/setup-go) action when setting up the environment |
 | `env` | no | A list of environment variables, seperated by `,`: `VAR1: value, VAR2: value`. This is typically used to pass dynamically-generated values, such as `ldflags`.|
 
@@ -162,4 +163,4 @@ successfully verified SLSA provenance
 Find our blog post series [here](TODO).
 
 ### Specifications
-For a more in-depth technical dive, read the [SPECIFICATIIONS.md](./SPECIFICATIIONS.md).
+For a more in-depth technical dive, read the [SPECIFICATIONS.md](./SPECIFICATIONS.md).
