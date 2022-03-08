@@ -8,9 +8,11 @@ ________
 - [Configuration file](#configuration-file)
 - [Workflow inputs](#workflow-inputs)
 - [Workflow Example](#workflow-example)
+
 [Verification of provenance](#verification)
 - [Inputs](#inputs)
 - [Command line examples](#command-line-example)
+
 [Technical design](#technial-design)
 - [Blog posts](#blog-posts)
 - [Specifications](#specifications)
