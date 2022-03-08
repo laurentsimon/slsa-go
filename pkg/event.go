@@ -1,0 +1,114 @@
+// Copyright The GOSST team.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package pkg
+
+import (
+	"errors"
+	"fmt"
+	"os"
+
+	"gopkg.in/yaml.v3"
+)
+
+type pushPayload struct {
+	Ref     string `yaml:"ref"`
+	BaseRef string `yaml:"base_ref"`
+}
+
+type GithubEvent struct {
+	Event  string
+	Branch string
+	Tag    string
+}
+
+var (
+	errorEnvNotSet    = errors.New("env variable not set")
+	errorNotSupported = errors.New("not supported")
+	errorEmptyRef     = errors.New("empty ref")
+)
+
+func GithubEventNew() (*GithubEvent, error) {
+	var c *GithubEvent
+	var err error
+
+	event := os.Getenv("GITHUB_EVENT_NAME")
+	if event == "" {
+		return nil, fmt.Errorf("GITHUB_EVENT_NAME: %w", errorEnvNotSet)
+	}
+
+	switch event {
+	case "push":
+		c, err = createEventFromPush()
+		if err != nil {
+			return nil, fmt.Errorf("push event: %w", err)
+		}
+	case "schedule":
+		c, err = createEventFromSchedule()
+		if err != nil {
+			return nil, fmt.Errorf("schedule event: %w", err)
+		}
+	default:
+		c, err = createDefaultEvent()
+		if err != nil {
+			return nil, fmt.Errorf("%s event: %w", event, err)
+		}
+	}
+	return c, nil
+}
+
+func createEventFromPush() (*GithubEvent, error) {
+	var payload pushPayload
+	path := os.Getenv("GITHUB_EVENT_PATH")
+	if path == "" {
+		return nil, fmt.Errorf("GITHUB_EVENT_PATH: %w", errorEnvNotSet)
+	}
+
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("os.ReadFile: %w", err)
+	}
+	if err := yaml.Unmarshal([]byte(content), &payload); err != nil {
+		return nil, fmt.Errorf("yaml.Unmarshal: %w", err)
+	}
+
+	if payload.Ref == "" {
+		return nil, fmt.Errorf("%w", errorEmptyRef)
+	}
+
+	// Base is empty if it's a push without a new tag.
+	if payload.BaseRef == "" {
+		return &GithubEvent{
+			Event:  "push",
+			Branch: payload.Ref,
+		}, nil
+	}
+
+	// Non-empty baseRef means a new tag.
+	return &GithubEvent{
+		Event:  "push",
+		Branch: payload.BaseRef,
+		Tag:    payload.Ref,
+	}, nil
+}
+
+func createEventFromSchedule() (*GithubEvent, error) {
+	// TODO
+	return nil, fmt.Errorf("%w", errorNotSupported)
+}
+
+func createDefaultEvent() (*GithubEvent, error) {
+	// TODO
+	return nil, fmt.Errorf("%w", errorNotSupported)
+}

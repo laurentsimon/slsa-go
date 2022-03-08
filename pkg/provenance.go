@@ -58,7 +58,13 @@ type (
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
-		Steps []Step
+		Steps []Step `json:"steps"`
+	}
+
+	Parameters struct {
+		Trigger string  `json:"trigger"`
+		Branch  string  `json:"branch"`
+		Tag     *string `json:"tag"` // May be nil.
 	}
 )
 
@@ -77,6 +83,11 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 	}
 
 	com, err := unmarshallCommand(command)
+	if err != nil {
+		return nil, err
+	}
+
+	params, err := createParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +129,7 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 						"GITHUB_EVENT_NAME": gh.EventName,
 					},
 				},
+				Parameters: params,
 			},
 			BuildConfig: BuildConfig{
 				Steps: []Step{
@@ -180,6 +192,24 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 	}
 
 	return signedAtt, nil
+}
+
+func createParameters() (Parameters, error) {
+	ghPayload, err := GithubEventNew()
+	if err != nil {
+		return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
+	}
+
+	params := Parameters{
+		Trigger: ghPayload.Event,
+		Branch:  ghPayload.Branch,
+	}
+
+	if ghPayload.Tag != "" {
+		params.Tag = &ghPayload.Tag
+	}
+
+	return params, err
 }
 
 func unmarshallCommand(command string) ([]string, error) {
