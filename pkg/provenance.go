@@ -52,13 +52,16 @@ type GitHubContext struct {
 	RunNumber  string `json:"run_number"`
 }
 
+var BuildConfigVersion int = 1
+
 type (
 	Step struct {
 		Command []string `json:"command"`
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
-		Steps []Step
+		Version int
+		Steps   []Step
 	}
 )
 
@@ -120,6 +123,7 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 				},
 			},
 			BuildConfig: BuildConfig{
+				Version: BuildConfigVersion,
 				Steps: []Step{
 					// Single step.
 					{
