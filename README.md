@@ -1,4 +1,4 @@
-# Generation of SLSA3+ provenance golang binaries
+# Generation of SLSA3+ provenance for golang binaries
 This repository contains a reference implementation for generating non-falsifiable [SLSA provenance](https://slsa.dev/) that meets the requirement for the [SLSA level 3 and above](https://slsa.dev/spec/v0.1/levels) for projects using the golang programming language.
 
 This repository contains the code, examples and technical design for our blog post on [Non falsifiable SLSA provenance using GitHub workflows](TODO).
