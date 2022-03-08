@@ -203,6 +203,8 @@ func createParameters() (Parameters, error) {
 		if !errors.Is(err, errorNotSupported) {
 			return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
 		}
+		// Allow empty parameters until we've added support for
+		// schedule and other events.
 		return Parameters{}, nil
 	}
 
