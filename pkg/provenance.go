@@ -62,9 +62,9 @@ type (
 	}
 
 	Parameters struct {
-		Trigger string  `json:"trigger"`
-		Branch  string  `json:"branch"`
-		Tag     *string `json:"tag"` // May be nil.
+		Event  string  `json:"event"`
+		Branch string  `json:"branch"`
+		Tag    *string `json:"tag"` // May be nil.
 	}
 )
 
@@ -201,8 +201,8 @@ func createParameters() (Parameters, error) {
 	}
 
 	params := Parameters{
-		Trigger: ghPayload.Event,
-		Branch:  ghPayload.Branch,
+		Event:  ghPayload.Event,
+		Branch: ghPayload.Branch,
 	}
 
 	if ghPayload.Tag != "" {
