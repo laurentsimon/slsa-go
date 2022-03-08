@@ -43,6 +43,8 @@ func GithubEventNew() (*GithubEvent, error) {
 	var c *GithubEvent
 	var err error
 
+	// See env variables available during a workflow run in
+	// https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
 	event := os.Getenv("GITHUB_EVENT_NAME")
 	if event == "" {
 		return nil, fmt.Errorf("GITHUB_EVENT_NAME: %w", errorEnvNotSet)

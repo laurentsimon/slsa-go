@@ -52,6 +52,8 @@ type GitHubContext struct {
 	RunNumber  string `json:"run_number"`
 }
 
+var parametersVersion int = 1
+
 type (
 	Step struct {
 		Command []string `json:"command"`
@@ -62,9 +64,10 @@ type (
 	}
 
 	Parameters struct {
-		Event  string  `json:"event"`
-		Branch string  `json:"branch"`
-		Tag    *string `json:"tag"` // May be nil.
+		Version int
+		Event   string  `json:"event"`
+		Branch  string  `json:"branch"`
+		Tag     *string `json:"tag,omitempty"` // May be nil.
 	}
 )
 
@@ -197,12 +200,16 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 func createParameters() (Parameters, error) {
 	ghPayload, err := GithubEventNew()
 	if err != nil {
-		return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
+		if !errors.Is(err, errorNotSupported) {
+			return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
+		}
+		return Parameters{}, nil
 	}
 
 	params := Parameters{
-		Event:  ghPayload.Event,
-		Branch: ghPayload.Branch,
+		Version: parametersVersion,
+		Event:   ghPayload.Event,
+		Branch:  ghPayload.Branch,
 	}
 
 	if ghPayload.Tag != "" {
