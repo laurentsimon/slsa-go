@@ -91,7 +91,7 @@ func main() {
 			githubContext, *provenanceCommand)
 		check(err)
 
-		filename := fmt.Sprintf("%s.intoto.sig", *provenanceName)
+		filename := fmt.Sprintf("%s.intoto.jsonl", *provenanceName)
 		err = ioutil.WriteFile(filename, attBytes, 0600)
 		check(err)
 
