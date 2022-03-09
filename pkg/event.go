@@ -27,10 +27,24 @@ type pushPayload struct {
 	BaseRef string `yaml:"base_ref"`
 }
 
+type workflowDispatchPayload struct {
+	Ref    string `yaml:"ref"`
+	Sender struct {
+		Login string `yaml:"login"`
+		Type  string `yaml:"type"`
+	} `yaml:"sender"`
+}
+
+type User struct {
+	Login string
+	Type  string
+}
+
 type GithubEvent struct {
 	Event  string
 	Branch string
 	Tag    string
+	User   User
 }
 
 var (
@@ -61,6 +75,11 @@ func GithubEventNew() (*GithubEvent, error) {
 		if err != nil {
 			return nil, fmt.Errorf("schedule event: %w", err)
 		}
+	case "workflow_dispatch":
+		c, err = createEventFromDispatch()
+		if err != nil {
+			return nil, fmt.Errorf("workflow_dispatch event: %w", err)
+		}
 	default:
 		c, err = createDefaultEvent()
 		if err != nil {
@@ -70,8 +89,7 @@ func GithubEventNew() (*GithubEvent, error) {
 	return c, nil
 }
 
-func createEventFromPush() (*GithubEvent, error) {
-	var payload pushPayload
+func readEventContent() ([]byte, error) {
 	path := os.Getenv("GITHUB_EVENT_PATH")
 	if path == "" {
 		return nil, fmt.Errorf("GITHUB_EVENT_PATH: %w", errorEnvNotSet)
@@ -81,6 +99,41 @@ func createEventFromPush() (*GithubEvent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("os.ReadFile: %w", err)
 	}
+	return content, nil
+}
+
+func createEventFromDispatch() (*GithubEvent, error) {
+	var payload workflowDispatchPayload
+	content, err := readEventContent()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal([]byte(content), &payload); err != nil {
+		return nil, fmt.Errorf("yaml.Unmarshal: %w", err)
+	}
+
+	if payload.Ref == "" {
+		return nil, fmt.Errorf("%w", errorEmptyRef)
+	}
+
+	return &GithubEvent{
+		Event:  "workflow_dispatch",
+		Branch: payload.Ref,
+		User: User{
+			Login: payload.Sender.Login,
+			Type:  payload.Sender.Type,
+		},
+	}, nil
+}
+
+func createEventFromPush() (*GithubEvent, error) {
+	var payload pushPayload
+	content, err := readEventContent()
+	if err != nil {
+		return nil, err
+	}
+
 	if err := yaml.Unmarshal([]byte(content), &payload); err != nil {
 		return nil, fmt.Errorf("yaml.Unmarshal: %w", err)
 	}

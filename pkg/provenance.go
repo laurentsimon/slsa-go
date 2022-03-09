@@ -67,7 +67,8 @@ type (
 		Version int
 		Event   string  `json:"event"`
 		Branch  string  `json:"branch"`
-		Tag     *string `json:"tag,omitempty"` // May be nil.
+		Tag     *string `json:"tag,omitempty"`  // May be nil: only populated for new tag push.
+		User    *User   `json:"user,omitempty"` // May be nil: only populated for workflow_dispatch.
 	}
 )
 
@@ -214,8 +215,14 @@ func createParameters() (Parameters, error) {
 		Branch:  ghPayload.Branch,
 	}
 
+	// Add the tag.
 	if ghPayload.Tag != "" {
 		params.Tag = &ghPayload.Tag
+	}
+
+	// Add the user.
+	if ghPayload.User.Login != "" || ghPayload.User.Type != "" {
+		params.User = &ghPayload.User
 	}
 
 	return params, err

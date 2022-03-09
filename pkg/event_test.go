@@ -54,6 +54,21 @@ func Test_GithubEventNew(t *testing.T) {
 			},
 		},
 		{
+			name: "workflow_dispatch event",
+			env: map[string]string{
+				"GITHUB_EVENT_NAME": "workflow_dispatch",
+				"GITHUB_EVENT_PATH": "testdata/workflow_dispatch_payload.json",
+			},
+			event: GithubEvent{
+				Event:  "workflow_dispatch",
+				Branch: "refs/heads/main",
+				User: User{
+					Login: "laurentsimon",
+					Type:  "User",
+				},
+			},
+		},
+		{
 			name: "empty event",
 			env: map[string]string{
 				"GITHUB_EVENT_NAME": "",
@@ -98,6 +113,7 @@ func Test_GithubEventNew(t *testing.T) {
 			}
 
 			c, err := GithubEventNew()
+
 			if !errCmp(err, tt.err) {
 				t.Errorf(cmp.Diff(err, tt.err))
 			}
