@@ -52,16 +52,26 @@ type GitHubContext struct {
 	RunNumber  string `json:"run_number"`
 }
 
-var BuildConfigVersion int = 1
-
+var (
+	parametersVersion  int = 1
+	buildConfigVersion int = 1
+)
 type (
 	Step struct {
 		Command []string `json:"command"`
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
+    Version int
+		Steps []Step `json:"steps"`
+	}
+
+	Parameters struct {
 		Version int
-		Steps   []Step
+		Event   string  `json:"event"`
+		Branch  string  `json:"branch"`
+		Tag     *string `json:"tag,omitempty"`  // May be nil: only populated for new tag push.
+		User    *User   `json:"user,omitempty"` // May be nil: only populated for workflow_dispatch.
 	}
 )
 
@@ -80,6 +90,11 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 	}
 
 	com, err := unmarshallCommand(command)
+	if err != nil {
+		return nil, err
+	}
+
+	params, err := createParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -121,9 +136,10 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 						"GITHUB_EVENT_NAME": gh.EventName,
 					},
 				},
+				Parameters: params,
 			},
 			BuildConfig: BuildConfig{
-				Version: BuildConfigVersion,
+				Version: buildConfigVersion,
 				Steps: []Step{
 					// Single step.
 					{
@@ -184,6 +200,36 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 	}
 
 	return signedAtt, nil
+}
+
+func createParameters() (Parameters, error) {
+	ghPayload, err := GithubEventNew()
+	if err != nil {
+		if !errors.Is(err, errorNotSupported) {
+			return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
+		}
+		// Allow empty parameters until we've added support for
+		// schedule and other events.
+		return Parameters{}, nil
+	}
+
+	params := Parameters{
+		Version: parametersVersion,
+		Event:   ghPayload.Event,
+		Branch:  ghPayload.Branch,
+	}
+
+	// Add the tag.
+	if ghPayload.Tag != "" {
+		params.Tag = &ghPayload.Tag
+	}
+
+	// Add the user.
+	if ghPayload.User.Login != "" || ghPayload.User.Type != "" {
+		params.User = &ghPayload.User
+	}
+
+	return params, err
 }
 
 func unmarshallCommand(command string) ([]string, error) {
