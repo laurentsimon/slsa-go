@@ -93,10 +93,31 @@ func (b *GoBuild) Run(dry bool) error {
 		flags = append(flags, fmt.Sprintf("-ldflags=%s", ldflags))
 	}
 
-	// Generate filename.
-	filename, err := b.generateOutputFilename()
-	if err != nil {
-		return err
+	// A dry run prints the information that is trusted, before
+	// the compiler is invoked.
+	if dry {
+		// Generate filename.
+		// Note: the filename uses the config file and is resolved if it contains env variables.
+		// `OUTPUT_BINARY` is only used during the actual compilation, an is a trusted
+		// variable hardcoded in the reusable workflow, to avoid weird looking name
+		// that may interfere with the compilation.
+		filename, err := b.generateOutputFilename()
+		if err != nil {
+			return err
+		}
+
+		// Set the filename last.
+		com := append(flags, []string{"-o", filename}...)
+
+		// Share the resolved name of the binary.
+		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
+		command, err := marshallCommand(com)
+		if err != nil {
+			return err
+		}
+		// Share the command used.
+		fmt.Printf("::set-output name=go-command: %s\n", command)
+		return nil
 	}
 
 	// Use the name provider via env variable for the compilation.
@@ -108,20 +129,6 @@ func (b *GoBuild) Run(dry bool) error {
 
 	// Set the filename last.
 	command := append(flags, []string{"-o", binary}...)
-
-	// A dry run prints the information that is trusted, before
-	// the compiler is invoked.
-	if dry {
-		// Share the resolved name of the binary.
-		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
-		command, err := marshallCommand(flags)
-		if err != nil {
-			return err
-		}
-		// Share the command used.
-		fmt.Printf("::set-output name=go-command: %s\n", command)
-		return nil
-	}
 
 	fmt.Println("binary", binary)
 	fmt.Println("command", command)
