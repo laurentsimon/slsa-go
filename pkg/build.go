@@ -93,15 +93,19 @@ func (b *GoBuild) Run(dry bool) error {
 		flags = append(flags, fmt.Sprintf("-ldflags=%s", ldflags))
 	}
 
-	// Generate filename.
-	filename, err := b.generateOutputFilename()
-	if err != nil {
-		return err
-	}
-
 	// A dry run prints the information that is trusted, before
 	// the compiler is invoked.
 	if dry {
+		// Generate filename.
+		// Note: the filename uses the config file and is resolved if it contains env variables.
+		// `OUTPUT_BINARY` is only used during the actual compilation, an is a trusted
+		// variable hardcoded in the reusable workflow, to avoid weird looking name
+		// that may interfere with the compilation.
+		filename, err := b.generateOutputFilename()
+		if err != nil {
+			return err
+		}
+
 		// Set the filename last.
 		com := append(flags, []string{"-o", filename}...)
 
