@@ -77,7 +77,9 @@ jobs:
         run: |
           set -euo pipefail
           #TODO(reproducible)
-          go mod vendor
+          echo "event: $GITHUB_EVENT_NAME"
+          cat "$GITHUB_EVENT_PATH"
+          exit -2
 
       # TODO(hermeticity) OS-level.
       # - name: Disable hermeticity
