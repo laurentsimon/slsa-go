@@ -79,7 +79,7 @@ jobs:
           #TODO(reproducible)
           echo "event: $GITHUB_EVENT_NAME"
           #cat "$GITHUB_EVENT_PATH"
-          echo "${{ github }}"
+          echo "${{ toJSON(github) }}"
           exit -2
 
       # TODO(hermeticity) OS-level.
