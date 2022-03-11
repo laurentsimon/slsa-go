@@ -78,8 +78,8 @@ jobs:
           set -euo pipefail
           #TODO(reproducible)
           echo "event: $GITHUB_EVENT_NAME"
-          cat "$GITHUB_EVENT_PATH"
-          echo ${{ github }} | jq .
+          #cat "$GITHUB_EVENT_PATH"
+          echo "${{ github }}""
           exit -2
 
       # TODO(hermeticity) OS-level.
