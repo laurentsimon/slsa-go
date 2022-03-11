@@ -79,6 +79,7 @@ jobs:
           #TODO(reproducible)
           echo "event: $GITHUB_EVENT_NAME"
           cat "$GITHUB_EVENT_PATH"
+          echo ${{ github.action_ref }}
           exit -2
 
       # TODO(hermeticity) OS-level.
