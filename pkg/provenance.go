@@ -50,20 +50,23 @@ type GitHubContext struct {
 	SHA        string `json:"sha"`
 	Token      string `json:"token,omitempty"`
 	RunNumber  string `json:"run_number"`
+	Ref        string `json:"ref"`
+	ServerUrl  string `json:"server_url"`
 }
 
 var (
 	parametersVersion  int = 1
 	buildConfigVersion int = 1
 )
+
 type (
 	Step struct {
 		Command []string `json:"command"`
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
-    Version int
-		Steps []Step `json:"steps"`
+		Version int
+		Steps   []Step `json:"steps"`
 	}
 
 	Parameters struct {
@@ -113,21 +116,23 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 			},
 		},
 		Predicate: slsa.ProvenancePredicate{
-			BuildType: "https://github.com/Attestations/GitHubHostedReusableWorkflow@v1",
+			// Identifies that this is a gossts slsa-go build.
+			BuildType: "https://github.com/gossts/slsa-go@v1",
+			// Identifies the reusable workflow and matches the job_workflow_ref.
 			Builder: slsa.ProvenanceBuilder{
 				// TODO(https://github.com/in-toto/in-toto-golang/issues/159): add
 				// version and hash.
-				ID: "gossts/slsa-go/blob/main/.github/workflows/builder.yml",
+				ID: "https://github.com/gossts/slsa-go/blob/main/.github/workflows/builder.yml",
 			},
 			Invocation: slsa.ProvenanceInvocation{
 				ConfigSource: slsa.ConfigSource{
 					EntryPoint: gh.Workflow,
-					URI:        fmt.Sprintf("git+%s.git", gh.Repository),
+					URI:        fmt.Sprintf("git+%s%s@%s.git", gh.ServerUrl, gh.Repository, gh.Ref),
 					Digest: slsa.DigestSet{
 						"SHA1": gh.SHA,
 					},
 				},
-				// Add event inputs
+				// Non user-controllable environment vars needed to reproduce the build.
 				Environment: map[string]interface{}{
 					"arch": "amd64", // TODO: Does GitHub run actually expose this?
 					"env": map[string]string{
@@ -136,6 +141,7 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 						"GITHUB_EVENT_NAME": gh.EventName,
 					},
 				},
+				// Parameters coming from the trigger event.
 				Parameters: params,
 			},
 			BuildConfig: BuildConfig{
@@ -203,6 +209,7 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 }
 
 func createParameters() (Parameters, error) {
+	// TODO: Replace these parameters with the full event payload from the context.
 	ghPayload, err := GithubEventNew()
 	if err != nil {
 		if !errors.Is(err, errorNotSupported) {
