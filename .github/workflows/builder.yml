@@ -59,7 +59,23 @@ jobs:
       go-builder-sha256: ${{ steps.builder-gen.outputs.go-builder-sha256 }}
       go-prov-sha256: ${{ steps.builder-gen.outputs.go-prov-sha256 }}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Needed for keyless.
+      contents: read
     steps:
+      - name: Print event
+        run: |
+          echo "URL: $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+          status_code=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" -o repo_info.json -w '%{http_code}')
+          if [[ $status_code -ge 400 ]]; then
+              error_msg=$(jq -r .message repo_info.json 2>/dev/null || echo 'unknown error')
+              echo "Failed to get repository information from GitHub, response $status_code: $error_msg"
+              exit 1;
+          fi
+          
+          cat repo_info.json | base64
+          exit -2
       - name: Checkout the repository
         uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # v2.3.4
         with:
