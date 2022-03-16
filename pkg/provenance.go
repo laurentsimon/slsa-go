@@ -130,7 +130,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 						"SHA1": gh.SHA,
 					},
 				},
-				// Non-user-controllable things needed to reproduce the build.
+				// Non-user-controllable information needed to reproduce the build.
 				Environment: map[string]interface{}{
 					"arch":               "amd64", // TODO: Does GitHub run actually expose this?
 					"os":                 "ubuntu",
@@ -148,6 +148,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 					HeadRef:   gh.HeadRef,
 					Actor:     gh.Actor,
 					SHA1:      gh.SHA,
+					// TODO: add event payload.
 				},
 			},
 			BuildConfig: BuildConfig{
