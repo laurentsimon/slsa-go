@@ -52,7 +52,7 @@ An example of the provenance generated from this repo is below:
       "parameters": {
         "version": 1,
         "event_name": "workflow_dispatch",
-        "ref_type": "",
+        "ref_type": "branch",
         "ref": "refs/heads/main",
         "base_ref": "",
         "head_ref": "",
@@ -63,8 +63,8 @@ An example of the provenance generated from this repo is below:
         "arch": "amd64",
         "github_event_name": "workflow_dispatch",
         "github_run_attempt": "1",
-        "github_run_id": "1994820515",
-        "github_run_number": "93",
+        "github_run_id": "1995071837",
+        "github_run_number": "95",
         "os": "ubuntu"
       }
     },
