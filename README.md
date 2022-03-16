@@ -23,7 +23,80 @@ ________
 To generate provenance for a golang binary, follow the steps below:
 
 ### Example provenance
-TODO
+An example of the provenance generated from this repo is below:
+```json
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "binary-linux-amd64",
+      "digest": {
+        "sha256": "0ae7e4fa71686538440012ee36a2634dbaa19df2dd16a466f52411fb348bbc4e"
+      }
+    }
+  ],
+  "predicate": {
+    "builder": {
+      "id": "https://github.com/gossts/slsa-go/.github/workflows/builder.yml@main"
+    },
+    "buildType": "https://github.com/gossts/slsa-go@v1",
+    "invocation": {
+      "configSource": {
+        "uri": "git+https://github.comasraa/slsa-on-github-test@refs/heads/main.git",
+        "digest": {
+          "SHA1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+        },
+        "entryPoint": "Test SLSA"
+      },
+      "parameters": {
+        "version": 1,
+        "event_name": "workflow_dispatch",
+        "ref_type": "",
+        "ref": "refs/heads/main",
+        "base_ref": "",
+        "head_ref": "",
+        "actor": "asraa",
+        "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+      },
+      "environment": {
+        "arch": "amd64",
+        "github_event_name": "workflow_dispatch",
+        "github_run_attempt": "1",
+        "github_run_id": "1994820515",
+        "github_run_number": "93",
+        "os": "ubuntu"
+      }
+    },
+    "buildConfig": {
+      "version": 1,
+      "steps": [
+        {
+          "command": [
+            "/opt/hostedtoolcache/go/1.17.7/x64/bin/go",
+            "build",
+            "-mod=vendor",
+            "-trimpath",
+            "-tags=netgo",
+            "-ldflags=-X main.gitVersion=v1.2.3 -X main.gitSomething=somthg",
+            "-o",
+            "binary-linux-amd64"
+          ],
+          "env": null
+        }
+      ]
+    },
+    "materials": [
+      {
+        "uri": "git+asraa/slsa-on-github-test.git",
+        "digest": {
+          "SHA1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+        }
+      }
+    ]
+  }
+}
+```
 
 ### Configuration file
 
