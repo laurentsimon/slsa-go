@@ -41,60 +41,65 @@ const (
 	defaultRekorAddr    = "https://rekor.sigstore.dev"
 )
 
-type GitHubContext struct {
+type gitHubContext struct {
 	Repository string `json:"repository"`
 	ActionPath string `json:"action_path"`
 	Workflow   string `json:"workflow"`
-	RunId      string `json:"run_id"`
 	EventName  string `json:"event_name"`
 	SHA        string `json:"sha"`
-	Token      string `json:"token,omitempty"`
+	RefType    string `json:"ref_type"`
+	Ref        string `json:"ref"`
+	BaseRef    string `json:"base_ref"`
+	HeadRef    string `json:"head_ref"`
+	Actor      string `json:"actor"`
 	RunNumber  string `json:"run_number"`
+	RunID      string `json:"run_id"`
+	RunAttempt string `json:"run_attempt"`
 }
 
 var (
 	parametersVersion  int = 1
 	buildConfigVersion int = 1
 )
+
 type (
 	Step struct {
 		Command []string `json:"command"`
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
-    Version int
-		Steps []Step `json:"steps"`
+		Version int
+		Steps   []Step `json:"steps"`
 	}
 
 	Parameters struct {
-		Version int
-		Event   string  `json:"event"`
-		Branch  string  `json:"branch"`
-		Tag     *string `json:"tag,omitempty"`  // May be nil: only populated for new tag push.
-		User    *User   `json:"user,omitempty"` // May be nil: only populated for workflow_dispatch.
+		Version    int    `json:"event"`
+		EventName  string `json:"event_name"`
+		RefType    string `json:"ref_type"`
+		Ref        string `json:"ref"`
+		BaseRef    string `json:"base_ref"`
+		HeadRef    string `json:"head_ref"`
+		RunNumber  string `json:"run_number"`
+		RunID      string `json:"run_id"`
+		RunAttempt string `json:"run_attempt"`
+		Actor      string `json:"actor"`
 	}
 )
 
 // GenerateProvenance translates github context into a SLSA provenance
 // attestation.
 // Spec: https://slsa.dev/provenance/v0.1
-func GenerateProvenance(name, digest, githubContext, command string) ([]byte, error) {
-	gh := &GitHubContext{}
-	if err := json.Unmarshal([]byte(githubContext), gh); err != nil {
+func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error) {
+	gh := &gitHubContext{}
+	if err := json.Unmarshal([]byte(ghContext), gh); err != nil {
 		return nil, err
 	}
-	gh.Token = ""
 
 	if _, err := hex.DecodeString(digest); err != nil || len(digest) != 64 {
 		return nil, fmt.Errorf("sha256 digest is not valid: %s", digest)
 	}
 
 	com, err := unmarshallCommand(command)
-	if err != nil {
-		return nil, err
-	}
-
-	params, err := createParameters()
 	if err != nil {
 		return nil, err
 	}
@@ -127,16 +132,23 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 						"SHA1": gh.SHA,
 					},
 				},
-				// Add event inputs
+				// Non-user-controllable things needed to reproduce the build.
 				Environment: map[string]interface{}{
 					"arch": "amd64", // TODO: Does GitHub run actually expose this?
-					"env": map[string]string{
-						"GITHUB_RUN_NUMBER": gh.RunNumber,
-						"GITHUB_RUN_ID":     gh.RunId,
-						"GITHUB_EVENT_NAME": gh.EventName,
-					},
+					"os":   "ubuntu",
 				},
-				Parameters: params,
+				// Parameters coming from the trigger event.
+				Parameters: Parameters{
+					Version:    parametersVersion,
+					EventName:  gh.EventName,
+					Ref:        gh.Ref,
+					BaseRef:    gh.BaseRef,
+					HeadRef:    gh.HeadRef,
+					Actor:      gh.Actor,
+					RunNumber:  gh.RunNumber,
+					RunID:      gh.RunID,
+					RunAttempt: gh.RunAttempt,
+				},
 			},
 			BuildConfig: BuildConfig{
 				Version: buildConfigVersion,
@@ -200,36 +212,6 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 	}
 
 	return signedAtt, nil
-}
-
-func createParameters() (Parameters, error) {
-	ghPayload, err := GithubEventNew()
-	if err != nil {
-		if !errors.Is(err, errorNotSupported) {
-			return Parameters{}, fmt.Errorf("GithubEventNew: %w", err)
-		}
-		// Allow empty parameters until we've added support for
-		// schedule and other events.
-		return Parameters{}, nil
-	}
-
-	params := Parameters{
-		Version: parametersVersion,
-		Event:   ghPayload.Event,
-		Branch:  ghPayload.Branch,
-	}
-
-	// Add the tag.
-	if ghPayload.Tag != "" {
-		params.Tag = &ghPayload.Tag
-	}
-
-	// Add the user.
-	if ghPayload.User.Login != "" || ghPayload.User.Type != "" {
-		params.User = &ghPayload.User
-	}
-
-	return params, err
 }
 
 func unmarshallCommand(command string) ([]string, error) {
