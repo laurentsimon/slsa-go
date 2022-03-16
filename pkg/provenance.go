@@ -80,6 +80,7 @@ type (
 		BaseRef   string `json:"base_ref"`
 		HeadRef   string `json:"head_ref"`
 		Actor     string `json:"actor"`
+		SHA1      string `json:"sha1"`
 	}
 )
 
@@ -146,6 +147,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 					BaseRef:   gh.BaseRef,
 					HeadRef:   gh.HeadRef,
 					Actor:     gh.Actor,
+					SHA1:      gh.SHA,
 				},
 			},
 			BuildConfig: BuildConfig{
