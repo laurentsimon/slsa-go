@@ -41,6 +41,7 @@ const (
 	defaultRekorAddr    = "https://rekor.sigstore.dev"
 )
 
+// https://docs.github.com/en/actions/learn-github-actions/contexts#github-context.
 type gitHubContext struct {
 	Repository string `json:"repository"`
 	ActionPath string `json:"action_path"`
@@ -154,6 +155,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 					Ref:       gh.Ref,
 					BaseRef:   gh.BaseRef,
 					HeadRef:   gh.HeadRef,
+					RefType:   gh.RefType,
 					Actor:     gh.Actor,
 					SHA1:      gh.SHA,
 					// TODO: add event payload.
