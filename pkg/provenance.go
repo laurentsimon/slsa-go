@@ -122,7 +122,7 @@ func GenerateProvenance(name, digest, githubContext, command string) ([]byte, er
 			Builder: slsa.ProvenanceBuilder{
 				// TODO(https://github.com/in-toto/in-toto-golang/issues/159): add
 				// version and hash.
-				ID: "https://github.com/gossts/slsa-go/blob/main/.github/workflows/builder.yml",
+				ID: "https://github.com/gossts/slsa-go/.github/workflows/builder.yml@main",
 			},
 			Invocation: slsa.ProvenanceInvocation{
 				ConfigSource: slsa.ConfigSource{
