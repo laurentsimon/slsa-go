@@ -1,10 +1,11 @@
 # Generation of SLSA3+ provenance for golang binaries
-This repository contains a reference implementation for generating non-falsifiable [SLSA provenance](https://slsa.dev/) that meets the requirement for the [SLSA level 3 and above](https://slsa.dev/spec/v0.1/levels) for projects using the golang programming language.
+This repository contains a reference implementation for generating non-falsifiable [SLSA provenance](https://slsa.dev/) that meets the requirement for the [SLSA level 3 and above](https://slsa.dev/spec/v0.1/levels) for projects using the Go programming language.
 
 This repository contains the code, examples and technical design for our blog post on [Non falsifiable SLSA provenance using GitHub workflows](TODO).
 
 ________
 [Generation of provenance](#generation)
+- [Example provenance](#example-provenance)
 - [Configuration file](#configuration-file)
 - [Workflow inputs](#workflow-inputs)
 - [Workflow Example](#workflow-example)
@@ -20,6 +21,9 @@ ________
 
 ## Generation
 To generate provenance for a golang binary, follow the steps below:
+
+### Example provenance
+TODO
 
 ### Configuration file
 
@@ -57,7 +61,7 @@ The builder workflow [gossts/slsa-go/.github/workflows/builder.yml](.github/work
 | Name | Required | Description |
 | ------------ | -------- | ----------- |
 | `go-version` | no | The go version for your project. This value is passed, unchanged, to the [actions/setup-go](https://github.com/actions/setup-go) action when setting up the environment |
-| `env` | no | A list of environment variables, seperated by `,`: `VAR1: value, VAR2: value`. This is typically used to pass dynamically-generated values, such as `ldflags`.|
+| `env` | no | A list of environment variables, seperated by `,`: `VAR1: value, VAR2: value`. This is typically used to pass dynamically-generated values, such as `ldflags`. Note that only environment variables with names starting with `CGO_` or `GO` are accepted.|
 
 ### Workflow Example
 Create a new workflow, say `.github/workflows/slsa-goreleaser.yml`:
