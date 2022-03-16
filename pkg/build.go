@@ -116,7 +116,7 @@ func (b *GoBuild) Run(dry bool) error {
 			return err
 		}
 		// Share the command used.
-		fmt.Printf("::set-output name=go-command: %s\n", command)
+		fmt.Printf("::set-output name=go-command::%s\n", command)
 		return nil
 	}
 
