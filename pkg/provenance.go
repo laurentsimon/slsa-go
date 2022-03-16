@@ -68,21 +68,18 @@ type (
 		Env     []string `json:"env"`
 	}
 	BuildConfig struct {
-		Version int
+		Version int    `json:"version"`
 		Steps   []Step `json:"steps"`
 	}
 
 	Parameters struct {
-		Version    int    `json:"event"`
-		EventName  string `json:"event_name"`
-		RefType    string `json:"ref_type"`
-		Ref        string `json:"ref"`
-		BaseRef    string `json:"base_ref"`
-		HeadRef    string `json:"head_ref"`
-		RunNumber  string `json:"run_number"`
-		RunID      string `json:"run_id"`
-		RunAttempt string `json:"run_attempt"`
-		Actor      string `json:"actor"`
+		Version   int    `json:"version"`
+		EventName string `json:"event_name"`
+		RefType   string `json:"ref_type"`
+		Ref       string `json:"ref"`
+		BaseRef   string `json:"base_ref"`
+		HeadRef   string `json:"head_ref"`
+		Actor     string `json:"actor"`
 	}
 )
 
@@ -134,20 +131,21 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 				},
 				// Non-user-controllable things needed to reproduce the build.
 				Environment: map[string]interface{}{
-					"arch": "amd64", // TODO: Does GitHub run actually expose this?
-					"os":   "ubuntu",
+					"arch":               "amd64", // TODO: Does GitHub run actually expose this?
+					"os":                 "ubuntu",
+					"github_event_name":  gh.EventName,
+					"github_run_number":  gh.RunNumber,
+					"github_run_id":      gh.RunID,
+					"github_run_attempt": gh.RunAttempt,
 				},
 				// Parameters coming from the trigger event.
 				Parameters: Parameters{
-					Version:    parametersVersion,
-					EventName:  gh.EventName,
-					Ref:        gh.Ref,
-					BaseRef:    gh.BaseRef,
-					HeadRef:    gh.HeadRef,
-					Actor:      gh.Actor,
-					RunNumber:  gh.RunNumber,
-					RunID:      gh.RunID,
-					RunAttempt: gh.RunAttempt,
+					Version:   parametersVersion,
+					EventName: gh.EventName,
+					Ref:       gh.Ref,
+					BaseRef:   gh.BaseRef,
+					HeadRef:   gh.HeadRef,
+					Actor:     gh.Actor,
 				},
 			},
 			BuildConfig: BuildConfig{
