@@ -55,6 +55,9 @@ type gitHubContext struct {
 	RunNumber  string `json:"run_number"`
 	RunID      string `json:"run_id"`
 	RunAttempt string `json:"run_attempt"`
+	// TODO: try removing this token:
+	// `omitting Token from the struct causes an unexpected end of line from encoding/json`
+	Token string `json:"token,omitempty"`
 }
 
 var (
@@ -92,6 +95,8 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 	if err := json.Unmarshal([]byte(ghContext), gh); err != nil {
 		return nil, err
 	}
+
+	gh.Token = ""
 
 	if _, err := hex.DecodeString(digest); err != nil || len(digest) != 64 {
 		return nil, fmt.Errorf("sha256 digest is not valid: %s", digest)
