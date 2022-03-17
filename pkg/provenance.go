@@ -136,7 +136,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 					EntryPoint: gh.Workflow,
 					URI:        fmt.Sprintf("git+%s%s@%s.git", gh.ServerUrl, gh.Repository, gh.Ref),
 					Digest: slsa.DigestSet{
-						"SHA1": gh.SHA,
+						"sha1": gh.SHA,
 					},
 				},
 				// Non user-controllable environment vars needed to reproduce the build.
@@ -175,7 +175,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 				{
 					URI: fmt.Sprintf("git+%s.git", gh.Repository),
 					Digest: slsa.DigestSet{
-						"SHA1": gh.SHA,
+						"sha1": gh.SHA,
 					},
 				},
 			},
