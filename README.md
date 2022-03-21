@@ -83,7 +83,7 @@ An example of the provenance generated from this repo is below:
             "-o",
             "binary-linux-amd64"
           ],
-         "env": [
+          "env": [
             "GOOS=linux",
             "GOARCH=amd64",
             "GO111MODULE=on",
