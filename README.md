@@ -45,7 +45,7 @@ An example of the provenance generated from this repo is below:
       "configSource": {
         "uri": "git+https://github.comasraa/slsa-on-github-test@refs/heads/main.git",
         "digest": {
-          "SHA1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+          "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
         },
         "entryPoint": "Test SLSA"
       },
@@ -90,7 +90,7 @@ An example of the provenance generated from this repo is below:
       {
         "uri": "git+asraa/slsa-on-github-test.git",
         "digest": {
-          "SHA1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+          "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
         }
       }
     ]
