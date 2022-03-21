@@ -58,7 +58,7 @@ An example of the provenance generated from this repo is below:
         "head_ref": "",
         "actor": "asraa",
         "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d",
-        "evant_payload": ...
+        "event_payload": ...
       },
       "environment": {
         "arch": "amd64",
