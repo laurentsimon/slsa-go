@@ -43,20 +43,21 @@ const (
 
 // https://docs.github.com/en/actions/learn-github-actions/contexts#github-context.
 type gitHubContext struct {
-	Repository string `json:"repository"`
-	ActionPath string `json:"action_path"`
-	Workflow   string `json:"workflow"`
-	EventName  string `json:"event_name"`
-	SHA        string `json:"sha"`
-	RefType    string `json:"ref_type"`
-	Ref        string `json:"ref"`
-	BaseRef    string `json:"base_ref"`
-	HeadRef    string `json:"head_ref"`
-	Actor      string `json:"actor"`
-	RunNumber  string `json:"run_number"`
-	ServerUrl  string `json:"server_url"`
-	RunID      string `json:"run_id"`
-	RunAttempt string `json:"run_attempt"`
+	Repository   string      `json:"repository"`
+	ActionPath   string      `json:"action_path"`
+	Workflow     string      `json:"workflow"`
+	EventName    string      `json:"event_name"`
+	EventPayload interface{} `json:"event"`
+	SHA          string      `json:"sha"`
+	RefType      string      `json:"ref_type"`
+	Ref          string      `json:"ref"`
+	BaseRef      string      `json:"base_ref"`
+	HeadRef      string      `json:"head_ref"`
+	Actor        string      `json:"actor"`
+	RunNumber    string      `json:"run_number"`
+	ServerUrl    string      `json:"server_url"`
+	RunID        string      `json:"run_id"`
+	RunAttempt   string      `json:"run_attempt"`
 	// TODO: try removing this token:
 	// `omitting Token from the struct causes an unexpected end of line from encoding/json`
 	Token string `json:"token,omitempty"`
@@ -78,14 +79,15 @@ type (
 	}
 
 	Parameters struct {
-		Version   int    `json:"version"`
-		EventName string `json:"event_name"`
-		RefType   string `json:"ref_type"`
-		Ref       string `json:"ref"`
-		BaseRef   string `json:"base_ref"`
-		HeadRef   string `json:"head_ref"`
-		Actor     string `json:"actor"`
-		SHA1      string `json:"sha1"`
+		Version      int         `json:"version"`
+		EventName    string      `json:"event_name"`
+		EventPayload interface{} `json:"event_payload"`
+		RefType      string      `json:"ref_type"`
+		Ref          string      `json:"ref"`
+		BaseRef      string      `json:"base_ref"`
+		HeadRef      string      `json:"head_ref"`
+		Actor        string      `json:"actor"`
+		SHA1         string      `json:"sha1"`
 	}
 )
 
@@ -150,15 +152,15 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 				},
 				// Parameters coming from the trigger event.
 				Parameters: Parameters{
-					Version:   parametersVersion,
-					EventName: gh.EventName,
-					Ref:       gh.Ref,
-					BaseRef:   gh.BaseRef,
-					HeadRef:   gh.HeadRef,
-					RefType:   gh.RefType,
-					Actor:     gh.Actor,
-					SHA1:      gh.SHA,
-					// TODO: add event payload.
+					Version:      parametersVersion,
+					EventName:    gh.EventName,
+					Ref:          gh.Ref,
+					BaseRef:      gh.BaseRef,
+					HeadRef:      gh.HeadRef,
+					RefType:      gh.RefType,
+					Actor:        gh.Actor,
+					SHA1:         gh.SHA,
+					EventPayload: gh.EventPayload,
 				},
 			},
 			BuildConfig: BuildConfig{
