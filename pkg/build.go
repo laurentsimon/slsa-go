@@ -118,13 +118,18 @@ func (b *GoBuild) Run(dry bool) error {
 		// Share the command used.
 		fmt.Printf("::set-output name=go-command::%s\n", command)
 
-		menvs, err := marshallList(envs)
+		env, err := b.generateCommandEnvVariables()
+		if err != nil {
+			return err
+		}
+
+		menv, err := marshallList(env)
 		if err != nil {
 			return err
 		}
 
 		// Share the env variables used.
-		fmt.Printf("::set-output name=go-env::%s\n", menvs)
+		fmt.Printf("::set-output name=go-env::%s\n", menv)
 		return nil
 	}
 
@@ -140,6 +145,7 @@ func (b *GoBuild) Run(dry bool) error {
 
 	fmt.Println("binary", binary)
 	fmt.Println("command", command)
+	fmt.Println("env", envs)
 	return syscall.Exec(b.goc, command, envs)
 }
 
@@ -156,8 +162,8 @@ func marshallList(args []string) (string, error) {
 	return encoded, nil
 }
 
-func (b *GoBuild) generateEnvVariables() ([]string, error) {
-	env := os.Environ()
+func (b *GoBuild) generateCommandEnvVariables() ([]string, error) {
+	var env []string
 
 	if b.cfg.Goos == "" {
 		return nil, fmt.Errorf("%w: %s", errorEnvVariableNameEmpty, "GOOS")
@@ -177,6 +183,19 @@ func (b *GoBuild) generateEnvVariables() ([]string, error) {
 
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
+
+	return env, nil
+}
+
+func (b *GoBuild) generateEnvVariables() ([]string, error) {
+	env := os.Environ()
+
+	cenv, err := b.generateCommandEnvVariables()
+	if err != nil {
+		return cenv, err
+	}
+
+	env = append(env, cenv...)
 
 	return env, nil
 }

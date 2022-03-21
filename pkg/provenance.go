@@ -96,6 +96,7 @@ type (
 // Spec: https://slsa.dev/provenance/v0.1
 func GenerateProvenance(name, digest, ghContext, command, envs string) ([]byte, error) {
 	gh := &gitHubContext{}
+
 	if err := json.Unmarshal([]byte(ghContext), gh); err != nil {
 		return nil, err
 	}
@@ -232,9 +233,15 @@ func GenerateProvenance(name, digest, ghContext, command, envs string) ([]byte, 
 	return signedAtt, nil
 }
 
-func unmarshallList(command string) ([]string, error) {
+func unmarshallList(arg string) ([]string, error) {
 	var res []string
-	cs, err := base64.StdEncoding.DecodeString(command)
+	// If argument is empty, return an empty list early,
+	// because `json.Unmarshal` would fail.
+	if arg == "" {
+		return res, nil
+	}
+
+	cs, err := base64.StdEncoding.DecodeString(arg)
 	if err != nil {
 		return res, fmt.Errorf("base64.StdEncoding.DecodeString: %w", err)
 	}

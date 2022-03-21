@@ -15,7 +15,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -84,10 +83,10 @@ func main() {
 			usage(os.Args[0])
 		}
 
-		githubContext, ok := os.LookupEnv("GITHUB_CONTEXT")
-		if !ok {
-			panic(errors.New("environment variable GITHUB_CONTEXT not present"))
-		}
+		githubContext, _ := os.LookupEnv("GITHUB_CONTEXT")
+		// if !ok {
+		// 	panic(errors.New("environment variable GITHUB_CONTEXT not present"))
+		// }
 
 		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest,
 			githubContext, *provenanceCommand, *provenanceEnv)
