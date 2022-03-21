@@ -28,7 +28,7 @@ import (
 func usage(p string) {
 	panic(fmt.Sprintf(`Usage: 
 	 %s build [--dry] slsa-releaser.yml
-	 %s provenance --binary-name $NAME --digest $DIGEST --command $COMMAND`, p, p))
+	 %s provenance --binary-name $NAME --digest $DIGEST --command $COMMAND --env $ENV`, p, p))
 }
 
 func check(e error) {
@@ -46,7 +46,8 @@ func main() {
 	provenanceCmd := flag.NewFlagSet("provenance", flag.ExitOnError)
 	provenanceName := provenanceCmd.String("binary-name", "", "untrusted binary name of the artifact built")
 	provenanceDigest := provenanceCmd.String("digest", "", "sha256 digest of the untrusted binary")
-	provenanceCommand := provenanceCmd.String("command", "", "command use to compile the binary")
+	provenanceCommand := provenanceCmd.String("command", "", "command used to compile the binary")
+	provenanceEnv := provenanceCmd.String("env", "", "env variables used to compile the binary")
 
 	// Expect a sub-command.
 	if len(os.Args) < 2 {
@@ -77,6 +78,7 @@ func main() {
 		check(err)
 	case provenanceCmd.Name():
 		provenanceCmd.Parse(os.Args[2:])
+		// Note: *provenanceEnv may be empty
 		if *provenanceName == "" || *provenanceDigest == "" ||
 			*provenanceCommand == "" {
 			usage(os.Args[0])
@@ -88,7 +90,7 @@ func main() {
 		}
 
 		attBytes, err := pkg.GenerateProvenance(*provenanceName, *provenanceDigest,
-			githubContext, *provenanceCommand)
+			githubContext, *provenanceCommand, *provenanceEnv)
 		check(err)
 
 		filename := fmt.Sprintf("%s.intoto.jsonl", *provenanceName)

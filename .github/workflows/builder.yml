@@ -24,8 +24,8 @@ env:
   # Builder
   BUILDER_BINARY: builder
   # This repo.
-  BUILDER_REPOSITORY: gossts/slsa-go
-  BUILDER_REF: main
+  BUILDER_REPOSITORY: laurentsimon/slsa-go
+  BUILDER_REF: feat/envvariables
 
 ###################################################################
 #                                                                 #
@@ -116,6 +116,7 @@ jobs:
     outputs:
       go-binary-name: ${{ steps.build-dry.outputs.go-binary-name }}
       go-command: ${{ steps.build-dry.outputs.go-command }}
+      go-env: ${{ steps.build-dry.outputs.go-env }}
     runs-on: ubuntu-latest
     needs: builder
     steps:
@@ -366,6 +367,7 @@ jobs:
           UNTRUSTED_BINARY_NAME: "${{ needs.build-dry.outputs.go-binary-name }}"
           UNTRUSTED_BINARY_HASH: "${{ needs.build.outputs.go-binary-sha256 }}"
           UNTRUSTED_COMMAND: "${{ needs.build-dry.outputs.go-command }}"
+          UNTRUSTED_ENV: "${{ needs.build-dry.outputs.go-env }}"
           BUILDER_BINARY: "${{ env.BUILDER_BINARY }}"
           GITHUB_CONTEXT: "${{ toJSON(github) }}"
         run: |
@@ -375,7 +377,7 @@ jobs:
 
           # Create and sign provenance
           # This sets signed-provenance-name to the name of the signed DSSE envelope.
-          ./"$BUILDER_BINARY" provenance --binary-name "$UNTRUSTED_BINARY_NAME" --digest "$UNTRUSTED_BINARY_HASH" --command "$UNTRUSTED_COMMAND"
+          ./"$BUILDER_BINARY" provenance --binary-name "$UNTRUSTED_BINARY_NAME" --digest "$UNTRUSTED_BINARY_HASH" --command "$UNTRUSTED_COMMAND" --env "$UNTRUSTED_ENV"
 
       - name: Upload the signed provenance
         uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2.3.1

@@ -111,12 +111,20 @@ func (b *GoBuild) Run(dry bool) error {
 
 		// Share the resolved name of the binary.
 		fmt.Printf("::set-output name=go-binary-name::%s\n", filename)
-		command, err := marshallCommand(com)
+		command, err := marshallList(com)
 		if err != nil {
 			return err
 		}
 		// Share the command used.
 		fmt.Printf("::set-output name=go-command::%s\n", command)
+
+		menvs, err := marshallList(envs)
+		if err != nil {
+			return err
+		}
+
+		// Share the env variables used.
+		fmt.Printf("::set-output name=go-env::%s\n", menvs)
 		return nil
 	}
 
@@ -135,7 +143,7 @@ func (b *GoBuild) Run(dry bool) error {
 	return syscall.Exec(b.goc, command, envs)
 }
 
-func marshallCommand(args []string) (string, error) {
+func marshallList(args []string) (string, error) {
 	jsonData, err := json.Marshal(args)
 	if err != nil {
 		return "", fmt.Errorf("json.Marshal: %w", err)
