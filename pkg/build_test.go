@@ -65,7 +65,7 @@ func Test_isAllowedEnvVariable(t *testing.T) {
 	}
 }
 
-func Test_marshallCommand(t *testing.T) {
+func Test_marshallList(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -94,9 +94,9 @@ func Test_marshallCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			r, err := marshallCommand(tt.variables)
+			r, err := marshallList(tt.variables)
 			if err != nil {
-				t.Errorf("marshallCommand: %v", err)
+				t.Errorf("marshallList: %v", err)
 			}
 			if !cmp.Equal(r, tt.expected) {
 				t.Errorf(cmp.Diff(r, tt.expected))

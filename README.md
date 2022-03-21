@@ -57,7 +57,8 @@ An example of the provenance generated from this repo is below:
         "base_ref": "",
         "head_ref": "",
         "actor": "asraa",
-        "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d"
+        "sha1": "11dba28bf106e98f9992daa56e3967be41a5f11d",
+        "evant_payload": ...
       },
       "environment": {
         "arch": "amd64",
@@ -82,7 +83,12 @@ An example of the provenance generated from this repo is below:
             "-o",
             "binary-linux-amd64"
           ],
-          "env": null
+         "env": [
+            "GOOS=linux",
+            "GOARCH=amd64",
+            "GO111MODULE=on",
+            "CGO_ENABLED=0"
+          ]
         }
       ]
     },
