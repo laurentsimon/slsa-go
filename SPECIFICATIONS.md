@@ -38,7 +38,7 @@ Non-falsifiable provenance requires trust in the builder, the provenance generat
 
 | Component | Requires trust for |
 | ----------- | ----------- |
-| **GitHub**        | - Executing expected code in workflows
+| **GitHub**        | - Executing expected code in workflows<br>- Integrity of data passed between job VMs
 |               | - Integrity of data passed between job VMs
 |               | - Isolation of defaults, environment variables between caller workflows and reusable workflows
 |               | - Isolation between jobs of a workflow
