@@ -2,15 +2,19 @@
 ________
 
 [Problem statement](#problem-statement)
+
 [Threat model](#threat-model)
+
 [Trusted builder and provenance generator](#trusted-builder-and-provenance-generator)
 - [Interference between jobs](#interference-between-jobs)
+
 [Workflow identity using OIDC and keyless signing](#Workflow-identity-using-oidc-and-keyless-signing)
 - [Example workflow for Go](#example-workflow-for-go)
 - [Provenance verification](#provenance-verification)
 - [Detailed steps](#detailed-steps)
 - [Verification latency](#verification-latency)
 - [Threats covered](#threats-covered)
+
 [SLSA4 requirements](#slsa4-requirements)
 - [Build-level provenance](#build-level-provenance)
 - [Source-level provenance](#source-level-provenance)
