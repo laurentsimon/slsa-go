@@ -198,10 +198,6 @@ Given an artifact and a signed provenance, we perform the following steps:
 2. **Verify the signed provenance**: Verify the signature in the DSSE payload using the signing certificate, and the chain of the signing certificate up to the Fulcio root CA. This verifies non-falsifiability of the payload and establishes trust in the contents of the certificate.
 
 3. **Extract the builder identity from the signing certificate**: Extract certificate information (see [here](https://github.com/sigstore/fulcio/blob/c74e2cfb763dd32def5dc921ff49f579fa262d96/docs/oid-info.md#136141572641--fulcio) for extension OIDs). Verify that the signing certificate’s subject name (job_workflow_ref) is the trusted builder ID at a trusted hash (repository SHA in the diagram below). This verifies authenticity of the provenance and guarantees the provenance was correctly populated.
- 
-![image](images/cert.png)
-
-![image](https://github.com/laurentsimon/slsa-go/blob/feat/specs/images/cert.png | width=100)
 
 <img src="images/cert.png" width="50%" height="50%">
 
