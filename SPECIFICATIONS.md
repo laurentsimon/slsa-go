@@ -38,17 +38,10 @@ Non-falsifiable provenance requires trust in the builder, the provenance generat
 
 | Component | Requires trust for |
 | ----------- | ----------- |
-| **GitHub**        | - Executing expected code in workflows<br>
-                      - Integrity of data passed between job VMs
-|               | - Integrity of data passed between job VMs
-|               | - Isolation of defaults, environment variables between caller workflows and reusable workflows
-|               | - Isolation between jobs of a workflow
-|               | - OIDC token issuance
-| **SigStore**      | - Ephemerality of signing key
-|               | - Fulcio authentication for signing certificate
-| **Generator workflow/Verifiers** (the trusted reusable workflow) | - Generating correct contents of the provenance 
-|               | - Build process isolation
-|               | - Correct verification of the signatures and provenance
+| **GitHub**        | - Executing expected code in workflows<br>- Integrity of data passed between job VMs<br>- Isolation of defaults, environment variables between caller workflows and reusable workflows<br>- Isolation between jobs of a workflow<br>- OIDC token issuance
+| **SigStore**      | - Ephemerality of signing key<br>- Fulcio authentication for signing certificate
+| **Generator workflow/Verifiers** (the trusted reusable workflow) | - Generating correct contents of the provenance<br>- Build process isolation<br>- Correct verification of the signatures and provenance
+
 
 We do not trust the users (project maintainers) of the builders. Even if they are malicious, they cannot tamper with the provenance. The content of the source code is out of scope: users may manipulate the repository’s code, including the environment variables declared in the build configuration files in the source, but they cannot produce incorrect provenance. The provenance will still be valid and non-falsifiable; it also contains the source repository reference where that code is defined.
 
@@ -226,7 +219,7 @@ Given an artifact and a signed provenance, we perform the following steps:
 
 3. **Extract the builder identity from the signing certificate**: Extract certificate information (see [here](https://github.com/sigstore/fulcio/blob/c74e2cfb763dd32def5dc921ff49f579fa262d96/docs/oid-info.md#136141572641--fulcio) for extension OIDs). Verify that the signing certificate’s subject name (job_workflow_ref) is the trusted builder ID at a trusted hash (repository SHA in the diagram below). This verifies authenticity of the provenance and guarantees the provenance was correctly populated.
 
-<img src="images/cert.png" width="50%" height="50%">
+<img src="images/cert.png" width="70%" height="70%">
 
 4. **Verify the provenance attestation against a policy, as usual**:  Parse the authenticated provenance and match the subject digest inside the provenance with the artifact digest. Additionally verify builder ID, configSource, and other properties according to policy.
 
