@@ -40,7 +40,7 @@ Non-falsifiable provenance requires trust in the builder, the provenance generat
 | ----------- | ----------- |
 | **GitHub**        | - Executing expected code in workflows<br>- Integrity of data passed between job VMs<br>- Isolation of defaults, environment variables between caller workflows and reusable workflows<br>- Isolation between jobs of a workflow<br>- OIDC token issuance
 | **SigStore**      | - Ephemerality of signing key<br>- Fulcio authentication for signing certificate
-| **Generator workflow/Verifiers** (the trusted reusable workflow) | - Generating correct contents of the provenance<br>- Build process isolation<br>- Correct verification of the signatures and provenance
+| **Generator workflow/Verifiers**<br>(the trusted reusable workflow) | - Generating correct contents of the provenance<br>- Build process isolation<br>- Correct verification of the signatures and provenance
 
 
 We do not trust the users (project maintainers) of the builders. Even if they are malicious, they cannot tamper with the provenance. The content of the source code is out of scope: users may manipulate the repository’s code, including the environment variables declared in the build configuration files in the source, but they cannot produce incorrect provenance. The provenance will still be valid and non-falsifiable; it also contains the source repository reference where that code is defined.
