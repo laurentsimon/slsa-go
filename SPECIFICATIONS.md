@@ -114,7 +114,35 @@ jobs:
 
 A reusable workflow itself can contain multiple jobs: so we can define a trusted builder that itself uses different VMs to compile the project on (trusted) GitHub-hosted runners, to generate the SLSA provenance and to generate a signature. We still need to pass data around between jobs via [GitHub artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts). All jobs in a workflow can upload artifacts and possibly tamper with those used by the trusted builder. So we protect their integrity via hashes. We can safely exchange hashes between the jobs because there's a trusted channel to pass them between jobs of the same workflow using namespaces that identify the exact job that generated it. (Of course, we could use this mechanism for exchanging the resulting binaries, but we don't do that because there are size limitations to this special trusted channel).
 
-TODO: diagram
+                                ┌──────────────────────┐         ┌───────────────────────────────┐
+                                │                      │         │                               │
+                                │**Source repository** │         │     **Trusted builder**       │
+                                │                      │         │     (reusable workflow)       │
+                                │                      │         │                               │
+                                │ .slsa-goreleaser.yml │         │                               │
+                                │                      ├─────────┼─────────────┐                 │
+                                │                      │         │             │                 │
+                                │                      │         │   ┌─────────▼─────────────┐   │
+                                │   User workflow      │         │   │     Build             │   │
+                                │                      │         │   └───────────────────────┘   │
+                                │                      │         |             |                 │
+                                │                      │         │   ┌─────────▼─────────────┐   │
+                                │                      │         │   │  Generate provenance  │   │
+                                │                      │         │   └─────────┬─────────────┘   │
+                                └──────────────────────┘         │             │                 │
+                                                                 │             │                 │
+                                                                 │             │                 │
+                                                                 │             │                 │
+                                                                 └─────────────┼─────────────────┘
+                                                                               │
+                                                                               │
+                                                                 ┌─────────────▼─────────────────┐
+                                                                 │                               │
+                                                                 │   binary    signed provenance │
+                                                                 │                               │
+                                                                 │                               │
+                                                                 │       **Artifacts**           │
+                                                                 └───────────────────────────────┘
 
 ## Workflow identity using OIDC and keyless signing
 
