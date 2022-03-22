@@ -193,7 +193,7 @@ jobs:
             ${{ needs.build.outputs.go-binary-name }}.intoto.jsonl
 ```
 
-An example of the output provenance can be found [here](https://github.com/gossts/slsa-go#example-provenance).
+An example of the output provenance can be found in [README.md#example-provenance](README.md#example-provenance).
 
 ### Provenance Verification
 
