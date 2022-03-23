@@ -39,9 +39,9 @@ func Test_unmarshallCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			r, err := unmarshallCommand(tt.value)
+			r, err := unmarshallList(tt.value)
 			if err != nil && len(tt.expected) != 0 {
-				t.Errorf("marshallCommand: %v", err)
+				t.Errorf("marshallList: %v", err)
 			}
 
 			if !cmp.Equal(r, tt.expected) {

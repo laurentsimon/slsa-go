@@ -94,8 +94,9 @@ type (
 // GenerateProvenance translates github context into a SLSA provenance
 // attestation.
 // Spec: https://slsa.dev/provenance/v0.1
-func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error) {
+func GenerateProvenance(name, digest, ghContext, command, envs string) ([]byte, error) {
 	gh := &gitHubContext{}
+
 	if err := json.Unmarshal([]byte(ghContext), gh); err != nil {
 		return nil, err
 	}
@@ -106,7 +107,12 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 		return nil, fmt.Errorf("sha256 digest is not valid: %s", digest)
 	}
 
-	com, err := unmarshallCommand(command)
+	com, err := unmarshallList(command)
+	if err != nil {
+		return nil, err
+	}
+
+	env, err := unmarshallList(envs)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +175,7 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 					// Single step.
 					{
 						Command: com,
-						// TODO: env variables.
+						Env:     env,
 					},
 				},
 			},
@@ -227,9 +233,15 @@ func GenerateProvenance(name, digest, ghContext, command string) ([]byte, error)
 	return signedAtt, nil
 }
 
-func unmarshallCommand(command string) ([]string, error) {
+func unmarshallList(arg string) ([]string, error) {
 	var res []string
-	cs, err := base64.StdEncoding.DecodeString(command)
+	// If argument is empty, return an empty list early,
+	// because `json.Unmarshal` would fail.
+	if arg == "" {
+		return res, nil
+	}
+
+	cs, err := base64.StdEncoding.DecodeString(arg)
 	if err != nil {
 		return res, fmt.Errorf("base64.StdEncoding.DecodeString: %w", err)
 	}
