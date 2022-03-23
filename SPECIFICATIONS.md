@@ -25,16 +25,16 @@ There are a large number of projects that are "GitHub native", in the sense they
 
 On GitHub, actions such as [go-releaser](https://github.com/goreleaser/goreleaser-action), [docker-releaser](http://github.com/docker/build-push-action), [pypi-publish](http://github.com/pypa/gh-action-pypi-publish) are a standard way used to release artifacts for go, docker and Python packages respectively (other package managers have similar actions).  
 
-In this proposal, we propose a flow how to achieve non-falsifiable (build and source) [provenance](https://slsa.dev/provenance/v0.2) using GitHub's standard workflows with a trusted action:
+In this proposal, we propose a flow to achieve non-forgeable (build and source) [provenance](https://slsa.dev/provenance/v0.2) using GitHub's standard workflows with a trusted action:
 - We are proposing a flow that is compatible with existing release processes, and we provide a layer to build provenance using actions. In the future the provenance generation can be incorporated into the standard actions that developers already use; or they could switch to using our action instead.
-- The code in this repository demonstrates that provenance generation is achievable using existing tooling provided by the open-source community, and we provide a prototype implementation for the Go ecosystem.
+- The code in this repository demonstrates that provenance generation is achievable using existing tooling provided by the open-source community, and provide a prototype implementation for the Go ecosystem that includes a guaranteed isolated and ephemeral build.
 
 An additional constraint we impose is that users should not need to manage cryptographic keys because they are hard to discover, keep safe, revoke and manage. In GitHub workflows, this is particularly important because [encrypted secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) are accessible to all repo maintainers with push access, regardless of the branch protection settings.
 
-The scope of the current design is limited to generating build provenance that satisfies SLSA 3 requirements. Extending to SLSA 4 would require a similar design to generate non-falsifiable attestations on source repository settings (e.g. code review), hermeticity, and reproducibility. The latter two build requirements may be ecosystem dependent, but if the ecosystem tooling supports it, then attestations on these can be generated with this design. Source level settings could use Scorecards, Allstar, or other similar tools.
+The scope of the current design is limited to generating build provenance that satisfies SLSA 3 requirements. Extending to SLSA 4 would require a similar design to generate non-forgeable attestations on source repository settings (e.g. code review), hermeticity, and reproducibility. The latter two build requirements may be ecosystem dependent, but if the ecosystem tooling supports it, then attestations on these can be generated with this design. Source level settings could use Scorecards, Allstar, or other similar tools.
 
 ## Threat model
-Non-falsifiable provenance requires trust in the builder, the provenance generator (reusable workflow), the provenance verifier, and the platform they run on (GitHub): those are part of the TCB. 
+Non-forgeable provenance requires trust in the builder, the provenance generator (reusable workflow), the provenance verifier, and the platform they run on (GitHub): those are part of the TCB. 
 
 | Component | Requires trust for |
 | ----------- | ----------- |
@@ -43,10 +43,10 @@ Non-falsifiable provenance requires trust in the builder, the provenance generat
 | **Generator workflow/Verifiers**<br>(the trusted reusable workflow) | - Generating correct contents of the provenance<br>- Build process isolation<br>- Correct verification of the signatures and provenance
 
 
-We do not trust the users (project maintainers) of the builders. Even if they are malicious, they cannot tamper with the provenance. The content of the source code is out of scope: users may manipulate the repository’s code, including the environment variables declared in the build configuration files in the source, but they cannot produce incorrect provenance. The provenance will still be valid and non-falsifiable; it also contains the source repository reference where that code is defined.
+We do not trust the users (project maintainers) of the builders. Even if they are malicious, they cannot tamper with the provenance. The content of the source code is out of scope: users may manipulate the repository’s code, including the environment variables declared in the build configuration files in the source, but they cannot produce incorrect provenance. The provenance will still be valid and non-forgeable; it also contains the source repository reference where that code is defined.
 
 ## Trusted builder and provenance generator
-Non-falsifiable provenance requires a trusted builder and a trusted provenance generator that are isolated from one another and from maintainer's interference. These are often referred to as "trusted builders" in the SLSA nomenclature. There is a direct mapping between the expected isolation we need and GitHub runners.
+Non-forgeable provenance requires a trusted builder and a trusted provenance generator that are isolated from one another and from maintainer's interference. These are often referred to as "trusted builders" in the SLSA nomenclature. There is a direct mapping between the expected isolation we need and GitHub runners.
 
 According to [GitHub's official documentation](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners), "each job in a workflow executes in a fresh instance of the virtual machine." Data can be [passed](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts#passing-data-between-jobs-in-a-workflow) between jobs using [GitHub's artifact registry within the workflow](https://github.com/actions/upload-artifact). In other words, the workflow is like the orchestrator that "glues" jobs together. We propose using a job as the isolation mechanism for our trusted builder and our trusted provenance generator.
 
@@ -89,7 +89,7 @@ jobs:
   vm1:     ...
 
   vm2: // Isolated job called "vm2" calling a trusted reusable workflow
-    uses: some/repo/.github./workflow/trusted-builder-reusable-workflow.yml
+    uses: some/repo/.github./workflow/trusted-builder-reusable-workflow.yml@v1
     // no other steps or actions can be used
     // no env variables can be declared
 ```
@@ -106,7 +106,7 @@ jobs:
   provenance: // Isolated job building and signing the provenance
 ```
 
-A reusable workflow itself can contain multiple jobs: so we can define a trusted builder that itself uses different VMs to compile the project on (trusted) GitHub-hosted runners, to generate the SLSA provenance and to generate a signature. We still need to pass data around between jobs via [GitHub artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts). All jobs in a workflow can upload artifacts and possibly tamper with those used by the trusted builder. So we protect their integrity via hashes. We can safely exchange hashes between the jobs because there's a trusted channel to pass them between jobs of the same workflow using namespaces that identify the exact job that generated it. (Of course, we could use this mechanism for exchanging the resulting binaries, but we don't do that because there are size limitations to this special trusted channel).
+A reusable workflow itself can contain multiple jobs: so we can define a trusted builder that itself uses different VMs to 1) compile the project and 2) generate the SLSA provenance - both using (trusted) GitHub-hosted runners. We still need to pass data around between jobs via [GitHub artifacts](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts). All jobs in a workflow can upload artifacts and possibly tamper with those used by the trusted builder. So we protect their integrity via hashes. We can safely exchange hashes between the jobs because there's a [trusted channel](https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs) to pass them between jobs of the same workflow using namespaces that identify the exact job that generated it. (Of course, we could use this mechanism for exchanging the resulting binaries, but we don't do that because there are size limitations to this special trusted channel).
 
                     ┌──────────────────────┐         ┌───────────────────────────────┐
                     │                      │         │                               │
@@ -201,7 +201,7 @@ Given an artifact and a signed provenance, a consumer must verify the authentici
 
 Authenticity and integrity come from the digital signature on the provenance that was created using a private key accessible only to the service generating the provenance. The ephemeral key is generated and stored inside the isolated builder VM. 
 
-Moreover, the provenance is non-falsifiable. We first verify builder identity: by verifying the signing certificate against the Fulcio root CA, we can trust the certificate contents were populated correctly according to the OIDC token Fulcio received. The subject URI identifies the `job_workflow_ref` inside the provisioned OIDC token; this is used to identify that the trusted builder (the reusable workflow) attests to the provenance. 
+Moreover, the provenance is non-forgeable. We first verify builder identity: by verifying the signing certificate against the Fulcio root CA, we can trust the certificate contents were populated correctly according to the OIDC token Fulcio received. The subject URI identifies the `job_workflow_ref` inside the provisioned OIDC token; this is used to identify that the trusted builder (the reusable workflow) attests to the provenance. 
 
 Because the signing key in the certificate and the OIDC token are only accessible inside this workflow, we have high confidence that the provenance was generated inside the service and that no other process could have impersonated the trusted builder. The ephemeral signing key is generated inside the workflow and does not get written to logs or leave the process. Moreover, even if the signing key was compromised, any signatures generated after the lifetime of the certificate (10 min) would be invalid, unless the attacker could retrieve a valid GitHub provisioned OIDC token for the trusted builder. Thus, the signing key is protected by the TTL of the certificate and its ephemerality. Further improvements on the scope of the signing certificate are discussed [here](https://github.com/sigstore/fulcio/issues/475). 
 
